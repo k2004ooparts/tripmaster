@@ -47,9 +47,9 @@
     button:hover {
       background-color: #00b4d8;
     }
-    #result {
+    #result, #mission, #badges {
       margin-top: 2rem;
-      font-size: 1.5rem;
+      font-size: 1.3rem;
       font-weight: bold;
       color: #03045e;
     }
@@ -79,27 +79,46 @@
   <button onclick="recommend()">여행지 추천받기</button>
 
   <div id="result"></div>
+  <div id="mission"></div>
+  <div id="badges"></div>
 
   <script>
+    let myBadges = [];
+
     function recommend() {
       const style = document.getElementById('style').value;
       const budget = document.getElementById('budget').value;
       let result = '';
-
       const places = {
         healing: ['제주 우도', '남해 다랭이마을'],
         activity: ['정선 레일바이크', '부산 서핑 해변'],
         culture: ['경주 유적지', '전주 한옥마을']
       };
-
       if (style && budget) {
         const choice = places[style][Math.floor(Math.random() * 2)];
         result = `추천 여행지: ${choice}`;
+        document.getElementById('result').textContent = result;
+        showMission();
       } else {
-        result = '여행 스타일과 예산을 모두 입력해 주세요!';
+        document.getElementById('result').textContent = '여행 스타일과 예산을 모두 입력해 주세요!';
       }
+    }
 
-      document.getElementById('result').textContent = result;
+    function showMission() {
+      document.getElementById('mission').innerHTML = `오늘의 미션: 현지 음식 맛보기 🍜<br/><button onclick="completeMission()">미션 완료</button>`;
+    }
+
+    function completeMission() {
+      const badge = "🍜 미식가 배지 획득!";
+      if (!myBadges.includes(badge)) {
+        myBadges.push(badge);
+      }
+      updateBadges();
+      document.getElementById('mission').textContent = '미션 완료! 축하합니다! 🎉';
+    }
+
+    function updateBadges() {
+      document.getElementById('badges').innerHTML = `🏅 내 배지: ${myBadges.join(', ')}`;
     }
   </script>
 </body>
