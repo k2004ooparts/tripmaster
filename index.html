@@ -74,7 +74,7 @@
       border-radius: 15px;
       margin-top: 1rem;
     }
-    #mission, #badges {
+    #mission, #badges, #savedTrips {
       margin-top: 2rem;
       font-size: 1.2rem;
       color: #333;
@@ -117,23 +117,24 @@
   <div id="result"></div>
   <div id="mission"></div>
   <div id="badges"></div>
+  <div id="savedTrips"></div>
 
   <script>
     let myBadges = [];
+    let savedTrips = JSON.parse(localStorage.getItem('savedTrips')) || [];
+    let userPoints = parseInt(localStorage.getItem('userPoints')) || 0;
+
+    const missions = [
+      '현지 음식 맛보기 🍜',
+      '특산품 사오기 🎁',
+      '현지 친구 만들기 🤝',
+      '풍경 사진 5장 찍기 📸'
+    ];
 
     const places = {
-      healing: [
-        { name: '제주 우도', image: 'https://images.unsplash.com/photo-1605006535072-182c094aeb5c', map: 'https://maps.app.goo.gl/bAXeqtRW4cUMhbbo7' },
-        { name: '남해 다랭이마을', image: 'https://images.unsplash.com/photo-1549887534-5803fdd2c853', map: 'https://maps.app.goo.gl/EFbRRm7RW6BkR1Z59' }
-      ],
-      activity: [
-        { name: '정선 레일바이크', image: 'https://images.unsplash.com/photo-1591117222393-1fc1a751a6b8', map: 'https://maps.app.goo.gl/sH2mNyWbTPs3Hesg7' },
-        { name: '부산 송정 서핑 해변', image: 'https://images.unsplash.com/photo-1574562919335-7e7aa9d39c09', map: 'https://maps.app.goo.gl/y9mNiNGEL9iF3aWy6' }
-      ],
-      culture: [
-        { name: '경주 유적지', image: 'https://images.unsplash.com/photo-1568359462233-2b197c38e00c', map: 'https://maps.app.goo.gl/owBdN2cuHssuh1rH8' },
-        { name: '전주 한옥마을', image: 'https://images.unsplash.com/photo-1614024629194-46a5d2f8e51d', map: 'https://maps.app.goo.gl/jopGnD6XeVA3JhUt5' }
-      ]
+      healing: [...],
+      activity: [...],
+      culture: [...]
     };
 
     function recommend() {
@@ -145,9 +146,10 @@
           <h2>${place.name}</h2>
           <img src="${place.image}" alt="${place.name}" class="place-image" />
           <br/>
-          <a href="${place.map}" target="_blank">
-            <button style="margin-top: 1rem;">지도 보기</button>
-          </a>
+          <a href="${place.map}" target="_blank"><button style="margin-top:1rem;">지도 보기</button></a>
+          <br/>
+          <button onclick="shareTrip('${place.name}')">공유하기</button>
+          <button onclick="saveTrip('${place.name}')">기록 저장</button>
         `;
         showMission();
       } else {
@@ -156,16 +158,19 @@
     }
 
     function showMission() {
-      document.getElementById('mission').innerHTML = `오늘의 미션: 현지 음식 맛보기 🍜<br/><button onclick="completeMission()">미션 완료</button>`;
+      const randomMission = missions[Math.floor(Math.random() * missions.length)];
+      document.getElementById('mission').innerHTML = `오늘의 미션: ${randomMission}<br/><button onclick="completeMission()">미션 완료</button>`;
     }
 
     function completeMission() {
-      const badge = "🍜 미식가 배지 획득!";
+      const badge = "🏅 미션 완료 배지!";
       if (!myBadges.includes(badge)) {
         myBadges.push(badge);
       }
+      userPoints += 10;
+      localStorage.setItem('userPoints', userPoints);
       updateBadges();
-      document.getElementById('mission').textContent = '미션 완료! 축하합니다! 🎉';
+      document.getElementById('mission').innerHTML = `미션 완료! 🎉 포인트 +10 (총 ${userPoints}점)`;
     }
 
     function updateBadges() {
@@ -174,6 +179,26 @@
       badgesDiv.classList.add('badge-animate');
       setTimeout(() => badgesDiv.classList.remove('badge-animate'), 1000);
     }
+
+    function saveTrip(name) {
+      savedTrips.push(name);
+      localStorage.setItem('savedTrips', JSON.stringify(savedTrips));
+      displaySavedTrips();
+    }
+
+    function displaySavedTrips() {
+      document.getElementById('savedTrips').innerHTML = `✨ 저장한 여행지: ${savedTrips.join(', ')}`;
+    }
+
+    function shareTrip(name) {
+      const url = encodeURIComponent(window.location.href);
+      const text = encodeURIComponent(`[TripMaster] 추천 여행지: ${name}`);
+      const shareUrl = `https://twitter.com/intent/tweet?url=${url}&text=${text}`;
+      window.open(shareUrl, '_blank');
+    }
+
+    // 최초 로딩 시 저장된 기록 보여주기
+    displaySavedTrips();
   </script>
 </body>
 </html>
