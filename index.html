@@ -10,7 +10,7 @@
       font-family: 'Poppins', sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #06142E; /* 로고 배경색과 정확히 맞춤 */
+      background-color: #06142E;
       color: #f0f0f0;
       min-height: 100vh;
       display: flex;
@@ -24,6 +24,13 @@
       width: 200px;
       height: auto;
       margin-bottom: 1.5rem;
+    }
+    img.place-image {
+      width: 300px;
+      height: 200px;
+      object-fit: cover;
+      margin-top: 1rem;
+      border-radius: 12px;
     }
     h1 {
       font-size: 2.5rem;
@@ -91,19 +98,55 @@
   <script>
     let myBadges = [];
 
+    const places = {
+      healing: [
+        {
+          name: '제주 우도',
+          image: 'https://images.unsplash.com/photo-1605006535072-182c094aeb5c',
+          map: 'https://maps.app.goo.gl/bAXeqtRW4cUMhbbo7'
+        },
+        {
+          name: '남해 다랭이마을',
+          image: 'https://images.unsplash.com/photo-1549887534-5803fdd2c853',
+          map: 'https://maps.app.goo.gl/EFbRRm7RW6BkR1Z59'
+        }
+      ],
+      activity: [
+        {
+          name: '정선 레일바이크',
+          image: 'https://images.unsplash.com/photo-1591117222393-1fc1a751a6b8',
+          map: 'https://maps.app.goo.gl/sH2mNyWbTPs3Hesg7'
+        },
+        {
+          name: '부산 송정 서핑 해변',
+          image: 'https://images.unsplash.com/photo-1574562919335-7e7aa9d39c09',
+          map: 'https://maps.app.goo.gl/y9mNiNGEL9iF3aWy6'
+        }
+      ],
+      culture: [
+        {
+          name: '경주 유적지',
+          image: 'https://images.unsplash.com/photo-1568359462233-2b197c38e00c',
+          map: 'https://maps.app.goo.gl/owBdN2cuHssuh1rH8'
+        },
+        {
+          name: '전주 한옥마을',
+          image: 'https://images.unsplash.com/photo-1614024629194-46a5d2f8e51d',
+          map: 'https://maps.app.goo.gl/jopGnD6XeVA3JhUt5'
+        }
+      ]
+    };
+
     function recommend() {
       const style = document.getElementById('style').value;
       const budget = document.getElementById('budget').value;
-      let result = '';
-      const places = {
-        healing: ['제주 우도', '남해 다랭이마을'],
-        activity: ['정선 레일바이크', '부산 서핑 해변'],
-        culture: ['경주 유적지', '전주 한옥마을']
-      };
       if (style && budget) {
-        const choice = places[style][Math.floor(Math.random() * 2)];
-        result = `추천 여행지: ${choice}`;
-        document.getElementById('result').textContent = result;
+        const place = places[style][Math.floor(Math.random() * 2)];
+        document.getElementById('result').innerHTML = `
+          추천 여행지: ${place.name}<br/>
+          <img src="${place.image}" alt="${place.name}" class="place-image" /><br/>
+          <a href="${place.map}" target="_blank"><button style="margin-top:10px;">지도 보기</button></a>
+        `;
         showMission();
       } else {
         document.getElementById('result').textContent = '여행 스타일과 예산을 모두 입력해 주세요!';
