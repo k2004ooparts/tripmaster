@@ -2,28 +2,83 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TripMaster - 나만의 여행 추천</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #90e0ef, #00b4d8);
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: #03045e;
+    }
+    select, input {
+      padding: 0.7rem;
+      margin: 0.5rem 0;
+      border-radius: 10px;
+      border: none;
+      width: 250px;
+      font-size: 1rem;
+    }
+    button {
+      background-color: #0077b6;
+      color: white;
+      padding: 0.8rem 2rem;
+      border: none;
+      border-radius: 30px;
+      font-size: 1.2rem;
+      margin-top: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #00b4d8;
+    }
+    #result {
+      margin-top: 2rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #03045e;
+    }
+  </style>
 </head>
-<body style="font-family: sans-serif; text-align: center; padding: 2rem;">
+<body>
   <h1>🧭 TripMaster</h1>
-  <p>여행 스타일과 예산을 선택하면 추천 여행지를 알려드려요.</p>
+  <p>여행 스타일과 예산을 선택하고 당신만의 여행지를 찾아보세요!</p>
 
-  <label>여행 스타일:
+  <label>
+    여행 스타일<br/>
     <select id="style">
+      <option value="">--선택하세요--</option>
       <option value="healing">힐링</option>
       <option value="activity">액티비티</option>
       <option value="culture">문화 체험</option>
     </select>
-  </label><br/><br/>
+  </label>
+  <br/>
 
-  <label>예산 (만원):
+  <label>
+    예산 (만원)<br/>
     <input type="number" id="budget" placeholder="예: 30" />
-  </label><br/><br/>
+  </label>
+  <br/>
 
   <button onclick="recommend()">여행지 추천받기</button>
 
-  <h2 id="result" style="margin-top: 2rem;"></h2>
+  <div id="result"></div>
 
   <script>
     function recommend() {
