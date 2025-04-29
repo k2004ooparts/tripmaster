@@ -122,6 +122,7 @@
   <script>
     let myBadges = [];
     let savedTrips = JSON.parse(localStorage.getItem('savedTrips')) || [];
+    let tripReviews = JSON.parse(localStorage.getItem('tripReviews')) || {};
     let userPoints = parseInt(localStorage.getItem('userPoints')) || 0;
 
     const missions = [
@@ -132,9 +133,18 @@
     ];
 
     const places = {
-      healing: [...],
-      activity: [...],
-      culture: [...]
+      healing: [
+        { name: '제주 우도', image: 'https://images.unsplash.com/photo-1605006535072-182c094aeb5c', map: 'https://maps.app.goo.gl/bAXeqtRW4cUMhbbo7' },
+        { name: '남해 다랭이마을', image: 'https://images.unsplash.com/photo-1549887534-5803fdd2c853', map: 'https://maps.app.goo.gl/EFbRRm7RW6BkR1Z59' }
+      ],
+      activity: [
+        { name: '정선 레일바이크', image: 'https://images.unsplash.com/photo-1591117222393-1fc1a751a6b8', map: 'https://maps.app.goo.gl/sH2mNyWbTPs3Hesg7' },
+        { name: '부산 송정 서핑 해변', image: 'https://images.unsplash.com/photo-1574562919335-7e7aa9d39c09', map: 'https://maps.app.goo.gl/y9mNiNGEL9iF3aWy6' }
+      ],
+      culture: [
+        { name: '경주 유적지', image: 'https://images.unsplash.com/photo-1568359462233-2b197c38e00c', map: 'https://maps.app.goo.gl/owBdN2cuHssuh1rH8' },
+        { name: '전주 한옥마을', image: 'https://images.unsplash.com/photo-1614024629194-46a5d2f8e51d', map: 'https://maps.app.goo.gl/jopGnD6XeVA3JhUt5' }
+      ]
     };
 
     function recommend() {
@@ -150,6 +160,7 @@
           <br/>
           <button onclick="shareTrip('${place.name}')">공유하기</button>
           <button onclick="saveTrip('${place.name}')">기록 저장</button>
+          <button onclick="writeReview('${place.name}')">후기 남기기</button>
         `;
         showMission();
       } else {
@@ -187,7 +198,12 @@
     }
 
     function displaySavedTrips() {
-      document.getElementById('savedTrips').innerHTML = `✨ 저장한 여행지: ${savedTrips.join(', ')}`;
+      let html = '✨ 저장한 여행지:<br/>';
+      savedTrips.forEach(trip => {
+        const review = tripReviews[trip] ? `<br/>후기: ${tripReviews[trip].text} (${tripReviews[trip].stars}⭐)` : '';
+        html += `${trip}${review}<br/>`;
+      });
+      document.getElementById('savedTrips').innerHTML = html;
     }
 
     function shareTrip(name) {
@@ -197,7 +213,20 @@
       window.open(shareUrl, '_blank');
     }
 
-    // 최초 로딩 시 저장된 기록 보여주기
+    function writeReview(name) {
+      const text = prompt('여행지에 대한 간단한 후기를 작성하세요!');
+      if (text) {
+        const stars = prompt('별점을 입력하세요 (1~5):');
+        if (stars >= 1 && stars <= 5) {
+          tripReviews[name] = { text, stars };
+          localStorage.setItem('tripReviews', JSON.stringify(tripReviews));
+          displaySavedTrips();
+        } else {
+          alert('별점은 1~5 사이 숫자여야 합니다.');
+        }
+      }
+    }
+
     displaySavedTrips();
   </script>
 </body>
