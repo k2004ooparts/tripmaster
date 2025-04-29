@@ -9,61 +9,84 @@
     body {
       font-family: 'Poppins', sans-serif;
       margin: 0;
-      padding: 0;
-      background-color: #06142E;
-      color: #f0f0f0;
+      padding: 2rem;
+      background-color: #f8f9fa;
+      color: #333;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
-      text-align: center;
-      padding: 2rem;
     }
     img.logo {
-      width: 200px;
-      height: auto;
-      margin-bottom: 1.5rem;
-    }
-    img.place-image {
-      width: 300px;
-      height: 200px;
-      object-fit: cover;
-      margin-top: 1rem;
-      border-radius: 12px;
+      width: 180px;
+      margin-bottom: 2rem;
     }
     h1 {
       font-size: 2.5rem;
       margin-bottom: 1rem;
-      color: #ffffff;
+      color: #111;
+    }
+    p {
+      font-size: 1.1rem;
+      color: #555;
+      margin-bottom: 2rem;
     }
     select, input {
-      padding: 0.7rem;
-      margin: 0.5rem 0;
-      border-radius: 10px;
-      border: none;
-      width: 250px;
-      font-size: 1rem;
+      padding: 0.9rem;
+      margin: 0.6rem 0;
+      width: 280px;
+      font-size: 1.05rem;
+      border-radius: 15px;
+      border: 1px solid #ccc;
+      background: #fff;
     }
     button {
-      background-color: #0077b6;
+      background-color: #007aff;
       color: white;
-      padding: 0.8rem 2rem;
+      padding: 0.9rem 2rem;
       border: none;
       border-radius: 30px;
       font-size: 1.2rem;
       margin-top: 1rem;
       cursor: pointer;
-      transition: background-color 0.3s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      transition: background-color 0.3s, transform 0.2s;
     }
     button:hover {
-      background-color: #00b4d8;
+      background-color: #005bb5;
+      transform: scale(1.05);
     }
-    #result, #mission, #badges {
+    #result {
       margin-top: 2rem;
-      font-size: 1.3rem;
-      font-weight: bold;
-      color: #ffffff;
+      background: white;
+      padding: 1.5rem;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      transition: all 0.5s ease;
+    }
+    img.place-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 15px;
+      margin-top: 1rem;
+    }
+    #mission, #badges {
+      margin-top: 2rem;
+      font-size: 1.2rem;
+      color: #333;
+      text-align: center;
+    }
+    .badge-animate {
+      animation: pop 0.5s ease forwards;
+    }
+    @keyframes pop {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(1); }
     }
   </style>
 </head>
@@ -100,40 +123,16 @@
 
     const places = {
       healing: [
-        {
-          name: '제주 우도',
-          image: 'https://images.unsplash.com/photo-1605006535072-182c094aeb5c',
-          map: 'https://maps.app.goo.gl/bAXeqtRW4cUMhbbo7'
-        },
-        {
-          name: '남해 다랭이마을',
-          image: 'https://images.unsplash.com/photo-1549887534-5803fdd2c853',
-          map: 'https://maps.app.goo.gl/EFbRRm7RW6BkR1Z59'
-        }
+        { name: '제주 우도', image: 'https://images.unsplash.com/photo-1605006535072-182c094aeb5c', map: 'https://maps.app.goo.gl/bAXeqtRW4cUMhbbo7' },
+        { name: '남해 다랭이마을', image: 'https://images.unsplash.com/photo-1549887534-5803fdd2c853', map: 'https://maps.app.goo.gl/EFbRRm7RW6BkR1Z59' }
       ],
       activity: [
-        {
-          name: '정선 레일바이크',
-          image: 'https://images.unsplash.com/photo-1591117222393-1fc1a751a6b8',
-          map: 'https://maps.app.goo.gl/sH2mNyWbTPs3Hesg7'
-        },
-        {
-          name: '부산 송정 서핑 해변',
-          image: 'https://images.unsplash.com/photo-1574562919335-7e7aa9d39c09',
-          map: 'https://maps.app.goo.gl/y9mNiNGEL9iF3aWy6'
-        }
+        { name: '정선 레일바이크', image: 'https://images.unsplash.com/photo-1591117222393-1fc1a751a6b8', map: 'https://maps.app.goo.gl/sH2mNyWbTPs3Hesg7' },
+        { name: '부산 송정 서핑 해변', image: 'https://images.unsplash.com/photo-1574562919335-7e7aa9d39c09', map: 'https://maps.app.goo.gl/y9mNiNGEL9iF3aWy6' }
       ],
       culture: [
-        {
-          name: '경주 유적지',
-          image: 'https://images.unsplash.com/photo-1568359462233-2b197c38e00c',
-          map: 'https://maps.app.goo.gl/owBdN2cuHssuh1rH8'
-        },
-        {
-          name: '전주 한옥마을',
-          image: 'https://images.unsplash.com/photo-1614024629194-46a5d2f8e51d',
-          map: 'https://maps.app.goo.gl/jopGnD6XeVA3JhUt5'
-        }
+        { name: '경주 유적지', image: 'https://images.unsplash.com/photo-1568359462233-2b197c38e00c', map: 'https://maps.app.goo.gl/owBdN2cuHssuh1rH8' },
+        { name: '전주 한옥마을', image: 'https://images.unsplash.com/photo-1614024629194-46a5d2f8e51d', map: 'https://maps.app.goo.gl/jopGnD6XeVA3JhUt5' }
       ]
     };
 
@@ -143,9 +142,12 @@
       if (style && budget) {
         const place = places[style][Math.floor(Math.random() * 2)];
         document.getElementById('result').innerHTML = `
-          추천 여행지: ${place.name}<br/>
-          <img src="${place.image}" alt="${place.name}" class="place-image" /><br/>
-          <a href="${place.map}" target="_blank"><button style="margin-top:10px;">지도 보기</button></a>
+          <h2>${place.name}</h2>
+          <img src="${place.image}" alt="${place.name}" class="place-image" />
+          <br/>
+          <a href="${place.map}" target="_blank">
+            <button style="margin-top: 1rem;">지도 보기</button>
+          </a>
         `;
         showMission();
       } else {
@@ -167,7 +169,10 @@
     }
 
     function updateBadges() {
-      document.getElementById('badges').innerHTML = `🏅 내 배지: ${myBadges.join(', ')}`;
+      const badgesDiv = document.getElementById('badges');
+      badgesDiv.innerHTML = `🏅 내 배지: ${myBadges.join(', ')}`;
+      badgesDiv.classList.add('badge-animate');
+      setTimeout(() => badgesDiv.classList.remove('badge-animate'), 1000);
     }
   </script>
 </body>
