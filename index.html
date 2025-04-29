@@ -1,34 +1,173 @@
-// TripMaster 로그인 기능 + 사용자 기반 구분 추가 스크립트 (상단에 삽입)
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🧭 TripMaster - 나만의 AI 여행 도우미</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0; padding: 2rem;
+      background-color: #f8f9fa;
+      color: #333;
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+    p { font-size: 1.1rem; color: #555; margin-bottom: 2rem; }
+    select, input {
+      padding: 0.9rem; margin: 0.6rem 0; width: 280px; font-size: 1rem;
+      border-radius: 15px; border: 1px solid #ccc; background: #fff;
+    }
+    button {
+      background-color: #007aff; color: white;
+      padding: 0.8rem 1.5rem; border: none; border-radius: 30px;
+      font-size: 1.1rem; margin: 0.5rem; cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: 0.3s ease;
+    }
+    button:hover { background-color: #005bb5; transform: scale(1.05); }
+    img.logo { width: 160px; margin-bottom: 1.5rem; }
+    img.place-image {
+      width: 100%; height: 200px; object-fit: cover;
+      border-radius: 15px; margin-top: 1rem;
+    }
+    #result, #mission, #badges, #savedTrips, #plans {
+      margin-top: 2rem; font-size: 1.1rem; text-align: center;
+      max-width: 500px; width: 100%;
+    }
+    .badge-animate { animation: pop 0.5s ease forwards; }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pop {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+    .plan-card {
+      margin: 1rem 0; padding: 1rem;
+      background: #fff; border-radius: 15px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      animation: fadeInUp 0.5s ease;
+    }
+  </style>
+</head>
+<body>
+  <div id="userBox" style="margin-bottom:1rem;text-align:right;width:100%;max-width:600px;"></div>
+  <img src="TripMaster_Threads_Logo_1.png" alt="TripMaster 로고" class="logo" />
+  <h1>🧭 TripMaster</h1>
+  <p>여행 스타일과 성향을 선택하고 당신만의 AI 여행지를 찾아보세요!</p>
 
-<script>
-let currentUser = localStorage.getItem('tripUser') || null;
+  <select id="style">
+    <option value="">🌍 여행 스타일 선택</option>
+    <option value="healing">🧘 힐링</option>
+    <option value="activity">🎢 액티비티</option>
+    <option value="culture">🏛️ 문화 체험</option>
+  </select><br/>
+  <input type="number" id="budget" placeholder="💰 예산 (만원) 입력" /><br/>
+  <button onclick="askPreferences()">🧠 여행 성향 설정</button>
+  <button onclick="smartRecommend()">🎯 AI 맞춤 추천받기</button>
 
-function loginUser() {
-  const name = prompt('사용자 이름을 입력하세요');
-  if (name) {
-    localStorage.setItem('tripUser', name);
-    currentUser = name;
-    alert(`환영합니다, ${name}님!`);
+  <div id="result"></div>
+  <div id="mission"></div>
+  <div id="badges"></div>
+  <div id="plans"></div>
+  <div id="savedTrips"></div>
+  <button onclick="createPlan()">📅 새 일정 만들기</button>
+
+  <script>
+    let currentUser = localStorage.getItem('tripUser') || null;
+    function loginUser() {
+      const name = prompt('사용자 이름을 입력하세요');
+      if (name) {
+        localStorage.setItem('tripUser', name);
+        currentUser = name;
+        alert(`환영합니다, ${name}님!`);
+        updateUserUI();
+      }
+    }
+    function logoutUser() {
+      localStorage.removeItem('tripUser');
+      currentUser = null;
+      alert('로그아웃 되었습니다.');
+      updateUserUI();
+    }
+    function updateUserUI() {
+      const box = document.getElementById('userBox');
+      box.innerHTML = currentUser ? `👤 ${currentUser} 님 <button onclick=\"logoutUser()\">로그아웃</button>` : `<button onclick=\"loginUser()\">👤 로그인</button>`;
+    }
     updateUserUI();
-  }
-}
 
-function logoutUser() {
-  localStorage.removeItem('tripUser');
-  currentUser = null;
-  alert('로그아웃 되었습니다.');
-  updateUserUI();
-}
+    const personalityQuestions = [
+      { id: 'companion', question: '혼자 여행 vs 함께 여행?', options: ['혼자', '함께'] },
+      { id: 'stylePref', question: '호캉스 vs 탐험파?', options: ['호캉스', '탐험'] },
+      { id: 'energy', question: '쉬기 vs 움직이기?', options: ['쉬기', '움직이기'] }
+    ];
+    let userPreferences = JSON.parse(localStorage.getItem('tripPrefs')) || {};
+    function askPreferences() {
+      let answers = {};
+      for (const q of personalityQuestions) {
+        const a = prompt(`${q.question}\n(${q.options.join(' / ')})`);
+        if (a) answers[q.id] = a;
+      }
+      userPreferences = answers;
+      localStorage.setItem('tripPrefs', JSON.stringify(userPreferences));
+    }
 
-function updateUserUI() {
-  const userBox = document.getElementById('userBox');
-  if (currentUser) {
-    userBox.innerHTML = `👤 ${currentUser} 님 <button onclick="logoutUser()">로그아웃</button>`;
-  } else {
-    userBox.innerHTML = `<button onclick="loginUser()">👤 로그인</button>`;
-  }
-}
+    function smartRecommend() {
+      const style = document.getElementById('style').value;
+      const budget = document.getElementById('budget').value;
+      if (!style || !budget || !userPreferences.energy) {
+        alert('여행 스타일, 예산, 성향을 모두 입력해주세요!'); return;
+      }
+      document.getElementById('result').innerHTML = '🧭 AI가 여행지를 추천 중입니다...';
+      setTimeout(() => {
+        const sample = { name: '제주 우도', image: 'https://images.unsplash.com/photo-1605006535072-182c094aeb5c', map: 'https://maps.app.goo.gl/bAXeqtRW4cUMhbbo7' };
+        document.getElementById('result').innerHTML = `<div style='animation:fadeInUp 0.6s ease;'><h2>${sample.name}</h2><img src='${sample.image}' class='place-image'/><br/><a href='${sample.map}' target='_blank'><button>📍 지도 보기</button></a><button onclick=\"addToPlan('${sample.name}')\">➕ 일정에 추가</button></div>`;
+        showMission();
+      }, 1200);
+    }
 
-updateUserUI();
-</script>
-<div id="userBox" style="margin-bottom:1rem;text-align:right;width:100%;max-width:600px;"></div>
+    function showMission() {
+      document.getElementById('mission').innerHTML = `오늘의 미션: 🍜 현지 음식 먹기!<br/><button onclick='completeMission()'>✅ 미션 완료</button>`;
+    }
+    let myBadges = [];
+    function completeMission() {
+      myBadges.push('🍜 미식가 배지');
+      document.getElementById('badges').innerHTML = `🏅 내 배지: ${myBadges.join(', ')}`;
+    }
+
+    let travelPlans = JSON.parse(localStorage.getItem('travelPlans')) || [];
+    function createPlan() {
+      const date = prompt('여행 날짜 입력 (예: 2025-06-01)');
+      const title = prompt('일정 제목 입력');
+      if (date && title) {
+        travelPlans.push({ date, title, places: [] });
+        localStorage.setItem('travelPlans', JSON.stringify(travelPlans));
+        displayPlans();
+      }
+    }
+    function addToPlan(placeName) {
+      if (travelPlans.length === 0) return alert('먼저 일정을 만들어주세요.');
+      const planList = travelPlans.map((p, i) => `${i + 1}. ${p.title} (${p.date})`).join('\n');
+      const i = parseInt(prompt(`추가할 일정 선택:\n${planList}`)) - 1;
+      if (travelPlans[i]) {
+        travelPlans[i].places.push(placeName);
+        localStorage.setItem('travelPlans', JSON.stringify(travelPlans));
+        displayPlans();
+      }
+    }
+    function displayPlans() {
+      const container = document.getElementById('plans');
+      container.innerHTML = '<h3>📅 나의 여행 일정</h3>';
+      travelPlans.forEach(p => {
+        container.innerHTML += `<div class='plan-card'><strong>${p.date} - ${p.title}</strong><br/>${p.places.join(', ')}</div>`;
+      });
+    }
+    displayPlans();
+  </script>
+</body>
+</html>
