@@ -1,233 +1,80 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TripMaster - 나만의 여행 추천</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      margin: 0;
-      padding: 2rem;
-      background-color: #f8f9fa;
-      color: #333;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    img.logo {
-      width: 180px;
-      margin-bottom: 2rem;
-    }
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
-      color: #111;
-    }
-    p {
-      font-size: 1.1rem;
-      color: #555;
-      margin-bottom: 2rem;
-    }
-    select, input {
-      padding: 0.9rem;
-      margin: 0.6rem 0;
-      width: 280px;
-      font-size: 1.05rem;
-      border-radius: 15px;
-      border: 1px solid #ccc;
-      background: #fff;
-    }
-    button {
-      background-color: #007aff;
-      color: white;
-      padding: 0.9rem 2rem;
-      border: none;
-      border-radius: 30px;
-      font-size: 1.2rem;
-      margin-top: 1rem;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-      transition: background-color 0.3s, transform 0.2s;
-    }
-    button:hover {
-      background-color: #005bb5;
-      transform: scale(1.05);
-    }
-    #result {
-      margin-top: 2rem;
-      background: white;
-      padding: 1.5rem;
-      border-radius: 20px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      width: 90%;
-      max-width: 400px;
-      text-align: center;
-      transition: all 0.5s ease;
-    }
-    img.place-image {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-      border-radius: 15px;
-      margin-top: 1rem;
-    }
-    #mission, #badges, #savedTrips {
-      margin-top: 2rem;
-      font-size: 1.2rem;
-      color: #333;
-      text-align: center;
-    }
-    .badge-animate {
-      animation: pop 0.5s ease forwards;
-    }
-    @keyframes pop {
-      0% { transform: scale(0); opacity: 0; }
-      50% { transform: scale(1.2); opacity: 1; }
-      100% { transform: scale(1); }
-    }
-  </style>
-</head>
-<body>
-  <img src="TripMaster_Threads_Logo_1.png" alt="TripMaster 로고" class="logo" />
-  <h1>🧭 TripMaster</h1>
-  <p>여행 스타일과 예산을 선택하고 당신만의 여행지를 찾아보세요!</p>
+// TripMaster 일정 기능 + UX 애니메이션 포함 버전 (추가분만)
 
-  <label>
-    여행 스타일<br/>
-    <select id="style">
-      <option value="">--선택하세요--</option>
-      <option value="healing">힐링</option>
-      <option value="activity">액티비티</option>
-      <option value="culture">문화 체험</option>
-    </select>
-  </label>
-  <br/>
+<script>
+let travelPlans = JSON.parse(localStorage.getItem('travelPlans')) || [];
 
-  <label>
-    예산 (만원)<br/>
-    <input type="number" id="budget" placeholder="예: 30" />
-  </label>
-  <br/>
+function createPlan() {
+  const date = prompt('여행 날짜를 입력하세요 (예: 2025-05-01)');
+  const title = prompt('일정 제목을 입력하세요 (예: 제주 힐링 여행)');
+  if (date && title) {
+    travelPlans.push({ date, title, places: [] });
+    localStorage.setItem('travelPlans', JSON.stringify(travelPlans));
+    alert('일정이 추가되었습니다!');
+    displayPlans();
+  }
+}
 
-  <button onclick="recommend()">여행지 추천받기</button>
+function addToPlan(placeName) {
+  if (travelPlans.length === 0) return alert('먼저 일정을 하나 만들어주세요!');
+  const planTitles = travelPlans.map((p, i) => `${i + 1}. ${p.title} (${p.date})`).join('\n');
+  const choice = prompt(`어느 일정에 추가할까요?\n${planTitles}`);
+  const index = parseInt(choice) - 1;
+  if (travelPlans[index]) {
+    travelPlans[index].places.push(placeName);
+    localStorage.setItem('travelPlans', JSON.stringify(travelPlans));
+    displayPlans();
+  }
+}
 
-  <div id="result"></div>
-  <div id="mission"></div>
-  <div id="badges"></div>
-  <div id="savedTrips"></div>
+function displayPlans() {
+  const container = document.getElementById('plans');
+  container.innerHTML = '<h3>📅 나의 여행 일정</h3>';
+  travelPlans.forEach(p => {
+    container.innerHTML += `<div class="plan-card" style="margin:1rem 0;padding:1rem;background:#fff;border-radius:15px;box-shadow:0 2px 10px rgba(0,0,0,0.1);animation:fadeIn 0.5s ease;">
+      <strong>${p.date} - ${p.title}</strong><br/>
+      ${p.places.length > 0 ? p.places.join(', ') : '추가된 여행지가 없습니다.'}
+    </div>`;
+  });
+}
 
-  <script>
-    let myBadges = [];
-    let savedTrips = JSON.parse(localStorage.getItem('savedTrips')) || [];
-    let tripReviews = JSON.parse(localStorage.getItem('tripReviews')) || {};
-    let userPoints = parseInt(localStorage.getItem('userPoints')) || 0;
-
-    const missions = [
-      '현지 음식 맛보기 🍜',
-      '특산품 사오기 🎁',
-      '현지 친구 만들기 🤝',
-      '풍경 사진 5장 찍기 📸'
-    ];
-
-    const places = {
-      healing: [
-        { name: '제주 우도', image: 'https://images.unsplash.com/photo-1605006535072-182c094aeb5c', map: 'https://maps.app.goo.gl/bAXeqtRW4cUMhbbo7' },
-        { name: '남해 다랭이마을', image: 'https://images.unsplash.com/photo-1549887534-5803fdd2c853', map: 'https://maps.app.goo.gl/EFbRRm7RW6BkR1Z59' }
-      ],
-      activity: [
-        { name: '정선 레일바이크', image: 'https://images.unsplash.com/photo-1591117222393-1fc1a751a6b8', map: 'https://maps.app.goo.gl/sH2mNyWbTPs3Hesg7' },
-        { name: '부산 송정 서핑 해변', image: 'https://images.unsplash.com/photo-1574562919335-7e7aa9d39c09', map: 'https://maps.app.goo.gl/y9mNiNGEL9iF3aWy6' }
-      ],
-      culture: [
-        { name: '경주 유적지', image: 'https://images.unsplash.com/photo-1568359462233-2b197c38e00c', map: 'https://maps.app.goo.gl/owBdN2cuHssuh1rH8' },
-        { name: '전주 한옥마을', image: 'https://images.unsplash.com/photo-1614024629194-46a5d2f8e51d', map: 'https://maps.app.goo.gl/jopGnD6XeVA3JhUt5' }
-      ]
-    };
-
-    function recommend() {
-      const style = document.getElementById('style').value;
-      const budget = document.getElementById('budget').value;
-      if (style && budget) {
-        const place = places[style][Math.floor(Math.random() * 2)];
-        document.getElementById('result').innerHTML = `
+// 결과 추천시 대기 애니메이션 + 일정 추가 버튼 반영
+function recommend() {
+  const style = document.getElementById('style').value;
+  const budget = document.getElementById('budget').value;
+  if (style && budget) {
+    document.getElementById('result').innerHTML = '<p>추천 중입니다... 잠시만 기다려주세요 🧭</p>';
+    setTimeout(() => {
+      const place = places[style][Math.floor(Math.random() * places[style].length)];
+      document.getElementById('result').innerHTML = `
+        <div style="animation:fadeInUp 0.6s ease;">
           <h2>${place.name}</h2>
-          <img src="${place.image}" alt="${place.name}" class="place-image" />
+          <img src="${place.image}" class="place-image" alt="${place.name}"/>
           <br/>
-          <a href="${place.map}" target="_blank"><button style="margin-top:1rem;">지도 보기</button></a>
-          <br/>
-          <button onclick="shareTrip('${place.name}')">공유하기</button>
-          <button onclick="saveTrip('${place.name}')">기록 저장</button>
-          <button onclick="writeReview('${place.name}')">후기 남기기</button>
-        `;
-        showMission();
-      } else {
-        document.getElementById('result').textContent = '여행 스타일과 예산을 모두 입력해 주세요!';
-      }
-    }
+          <a href="${place.map}" target="_blank"><button>지도 보기</button></a>
+          <button onclick="addToPlan('${place.name}')">일정에 추가</button>
+        </div>
+      `;
+      showMission();
+    }, 1200);
+  } else {
+    document.getElementById('result').textContent = '여행 스타일과 예산을 모두 입력해 주세요!';
+  }
+}
 
-    function showMission() {
-      const randomMission = missions[Math.floor(Math.random() * missions.length)];
-      document.getElementById('mission').innerHTML = `오늘의 미션: ${randomMission}<br/><button onclick="completeMission()">미션 완료</button>`;
-    }
+// 애니메이션
+const style = document.createElement('style');
+style.innerHTML = `
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}`;
+document.head.appendChild(style);
 
-    function completeMission() {
-      const badge = "🏅 미션 완료 배지!";
-      if (!myBadges.includes(badge)) {
-        myBadges.push(badge);
-      }
-      userPoints += 10;
-      localStorage.setItem('userPoints', userPoints);
-      updateBadges();
-      document.getElementById('mission').innerHTML = `미션 완료! 🎉 포인트 +10 (총 ${userPoints}점)`;
-    }
-
-    function updateBadges() {
-      const badgesDiv = document.getElementById('badges');
-      badgesDiv.innerHTML = `🏅 내 배지: ${myBadges.join(', ')}`;
-      badgesDiv.classList.add('badge-animate');
-      setTimeout(() => badgesDiv.classList.remove('badge-animate'), 1000);
-    }
-
-    function saveTrip(name) {
-      savedTrips.push(name);
-      localStorage.setItem('savedTrips', JSON.stringify(savedTrips));
-      displaySavedTrips();
-    }
-
-    function displaySavedTrips() {
-      let html = '✨ 저장한 여행지:<br/>';
-      savedTrips.forEach(trip => {
-        const review = tripReviews[trip] ? `<br/>후기: ${tripReviews[trip].text} (${tripReviews[trip].stars}⭐)` : '';
-        html += `${trip}${review}<br/>`;
-      });
-      document.getElementById('savedTrips').innerHTML = html;
-    }
-
-    function shareTrip(name) {
-      const url = encodeURIComponent(window.location.href);
-      const text = encodeURIComponent(`[TripMaster] 추천 여행지: ${name}`);
-      const shareUrl = `https://twitter.com/intent/tweet?url=${url}&text=${text}`;
-      window.open(shareUrl, '_blank');
-    }
-
-    function writeReview(name) {
-      const text = prompt('여행지에 대한 간단한 후기를 작성하세요!');
-      if (text) {
-        const stars = prompt('별점을 입력하세요 (1~5):');
-        if (stars >= 1 && stars <= 5) {
-          tripReviews[name] = { text, stars };
-          localStorage.setItem('tripReviews', JSON.stringify(tripReviews));
-          displaySavedTrips();
-        } else {
-          alert('별점은 1~5 사이 숫자여야 합니다.');
-        }
-      }
-    }
-
-    displaySavedTrips();
-  </script>
-</body>
-</html>
+displayPlans();
+</script>
+<div id="plans"></div>
+<button onclick="createPlan()">+ 새 일정 만들기</button>
