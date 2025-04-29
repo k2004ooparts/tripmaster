@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TripMaster - 나만의 여행 추천</title>
+</head>
+<body style="font-family: sans-serif; text-align: center; padding: 2rem;">
+  <h1>🧭 TripMaster</h1>
+  <p>여행 스타일과 예산을 선택하면 추천 여행지를 알려드려요.</p>
+
+  <label>여행 스타일:
+    <select id="style">
+      <option value="healing">힐링</option>
+      <option value="activity">액티비티</option>
+      <option value="culture">문화 체험</option>
+    </select>
+  </label><br/><br/>
+
+  <label>예산 (만원):
+    <input type="number" id="budget" placeholder="예: 30" />
+  </label><br/><br/>
+
+  <button onclick="recommend()">여행지 추천받기</button>
+
+  <h2 id="result" style="margin-top: 2rem;"></h2>
+
+  <script>
+    function recommend() {
+      const style = document.getElementById('style').value;
+      const budget = document.getElementById('budget').value;
+      let result = '';
+
+      const places = {
+        healing: ['제주 우도', '남해 다랭이마을'],
+        activity: ['정선 레일바이크', '부산 서핑 해변'],
+        culture: ['경주 유적지', '전주 한옥마을']
+      };
+
+      if (style && budget) {
+        const choice = places[style][Math.floor(Math.random() * 2)];
+        result = `추천 여행지: ${choice}`;
+      } else {
+        result = '여행 스타일과 예산을 모두 입력해 주세요!';
+      }
+
+      document.getElementById('result').textContent = result;
+    }
+  </script>
+</body>
+</html>
